@@ -1,7 +1,10 @@
 package com.example.UserService.services;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Optional;
+
+import javax.crypto.SecretKey;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +21,9 @@ import com.example.UserService.models.User;
 import com.example.UserService.repositories.SessionRepository;
 import com.example.UserService.repositories.UserRepository;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.MacAlgorithm;
+
 @Service
 public class AuthService {
     private UserRepository userRepository;
@@ -33,13 +39,10 @@ public class AuthService {
 
     public UserDto signUp(String email, String password){
         User user = new User();
-
         user.setEmail(email);
         user.setPassword(bCryptPasswordEncoder.encode(password));
-
         User savedUser = userRepository.save(user);
         return UserDto.from(savedUser);
-
     }
 
     public ResponseEntity<UserDto> logIn(String email, String password){
@@ -52,8 +55,25 @@ public class AuthService {
         if(!bCryptPasswordEncoder.matches(password, user.getPassword())){
             return null;
         }
+        // way: 1: random token generation
+        //String token = RandomStringUtils.randomAlphanumeric(30);
 
-        String token = RandomStringUtils.randomAlphanumeric(30);
+
+        // way 2: JWT token generation
+        String message = "{\n" +
+       "   \"email\": \"naman@scaler.com\",\n" +
+       "   \"roles\": [\n" +
+       "      \"mentor\",\n" +
+       "      \"ta\"\n" +
+       "   ],\n" +
+       "   \"expirationDate\": \"23rdOctober2023\"\n" +
+       "}";
+        byte[] content = message.getBytes(StandardCharsets.UTF_8);
+
+        MacAlgorithm alg = Jwts.SIG.HS256;
+        SecretKey key = alg.key().build();
+        String token = Jwts.builder().content(content).signWith(key, alg).compact();
+
 
         Session session = new Session();
         session.setToken(token);

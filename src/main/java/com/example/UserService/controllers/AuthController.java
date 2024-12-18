@@ -37,12 +37,6 @@ public class AuthController {
         }
 
     @PostMapping("/validate")
-    public String postMethodName(@RequestBody String entity) {
-        //TODO: process POST request
-        
-        return entity;
-    }
-    
     public ResponseEntity<SessionStatus> validate(@RequestBody ValidateTokenRequestDto validateTokenRequestDto){
         return new ResponseEntity<>(authService
         .validate(validateTokenRequestDto.getToken(), validateTokenRequestDto.getUserId()), HttpStatus.OK);
