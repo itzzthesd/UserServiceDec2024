@@ -1,7 +1,9 @@
 package com.example.UserService.services;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.crypto.SecretKey;
@@ -59,20 +61,31 @@ public class AuthService {
         //String token = RandomStringUtils.randomAlphanumeric(30);
 
 
-        // way 2: JWT token generation
-        String message = "{\n" +
-       "   \"email\": \"naman@scaler.com\",\n" +
-       "   \"roles\": [\n" +
-       "      \"mentor\",\n" +
-       "      \"ta\"\n" +
-       "   ],\n" +
-       "   \"expirationDate\": \"23rdOctober2023\"\n" +
-       "}";
-        byte[] content = message.getBytes(StandardCharsets.UTF_8);
+        // way 2: JWT token generation - via byte code
+    //     String message = "{\n" +
+    //    "   \"email\": \"naman@scaler.com\",\n" +
+    //    "   \"roles\": [\n" +
+    //    "      \"mentor\",\n" +
+    //    "      \"ta\"\n" +
+    //    "   ],\n" +
+    //    "   \"expirationDate\": \"23rdOctober2023\"\n" +
+    //    "}";
+    //     byte[] content = message.getBytes(StandardCharsets.UTF_8);
+    //     MacAlgorithm alg = Jwts.SIG.HS256;
+    //    SecretKey key = alg.key().build();
+    //String token = Jwts.builder().content(content).signWith(key, alg).compact();
+    
+
+        // way 3: JWT token generation via hashmap
+        Map<String, Object> jsonForJwt = new HashMap<>();
+        jsonForJwt.put("email", user.getEmail());
+        jsonForJwt.put("roles", user.getRoles());
+        jsonForJwt.put("expirationDate", new Date());
+        jsonForJwt.put("createAt", new Date());
 
         MacAlgorithm alg = Jwts.SIG.HS256;
         SecretKey key = alg.key().build();
-        String token = Jwts.builder().content(content).signWith(key, alg).compact();
+        String token = Jwts.builder().claims(jsonForJwt).signWith(key, alg).compact();
 
 
         Session session = new Session();
