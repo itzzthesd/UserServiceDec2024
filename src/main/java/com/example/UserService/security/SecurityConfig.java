@@ -48,41 +48,66 @@ public class SecurityConfig {
     public SecurityConfig(BCryptPasswordEncoder bCryptPasswordEncoder){
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
+	@Bean
+    @Order(1)
+    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) // method from Nikhil sir code
+            throws Exception {
+        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+                .oidc(Customizer.withDefaults());	// Enable OpenID Connect 1.0
+        http
+                // Redirect to the login page when not authenticated from the
+                // authorization endpoint
+                .exceptionHandling((exceptions) -> exceptions
+                        .defaultAuthenticationEntryPointFor(
+                                new LoginUrlAuthenticationEntryPoint("/login"),
+                                new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
+                        )
+                )
+                // Accept access tokens for User Info and/or Client Registration
+                .oauth2ResourceServer((resourceServer) -> resourceServer
+                        .jwt(Customizer.withDefaults()));
 
-	@Bean 
-	@Order(1)
-	public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http)
-			throws Exception {
-		OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
-				OAuth2AuthorizationServerConfigurer.authorizationServer();
+        return http.build();
+    }
+	// @Bean 
+	// @Order(1)
+	// public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) // code from spring offical site
+	// 		throws Exception {
+	// 	OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
+	// 			OAuth2AuthorizationServerConfigurer.authorizationServer();
 
-		http
-			.securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
-			.with(authorizationServerConfigurer, (authorizationServer) ->
-				authorizationServer
-					.oidc(Customizer.withDefaults())	// Enable OpenID Connect 1.0
-			)
-			.authorizeHttpRequests((authorize) ->
-				authorize
-					.anyRequest().authenticated()
-			)
-			// Redirect to the login page when not authenticated from the
-			// authorization endpoint
-			.exceptionHandling((exceptions) -> exceptions
-				.defaultAuthenticationEntryPointFor(
-					new LoginUrlAuthenticationEntryPoint("/login"),
-					new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
-				)
-			);
+	// 	http
+	// 		.securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
+	// 		.with(authorizationServerConfigurer, (authorizationServer) ->
+	// 			authorizationServer
+	// 				.oidc(Customizer.withDefaults())	// Enable OpenID Connect 1.0
+	// 		)
+	// 		.authorizeHttpRequests((authorize) ->
+	// 			authorize
+	// 				.anyRequest().authenticated()
+	// 		)
+	// 		//.httpStrictTransportSecurity().disable()
+	// 		// Redirect to the login page when not authenticated from the
+	// 		// authorization endpoint
+	// 		.exceptionHandling((exceptions) -> exceptions
+	// 			.defaultAuthenticationEntryPointFor(
+	// 				new LoginUrlAuthenticationEntryPoint("/login"),
+	// 				new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
+	// 			)
+	// 		);
 
-		return http.build();
-	}
+	// 	return http.build();
+	// }
 
 	@Bean 
 	@Order(2)
 	public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http)
 			throws Exception {
 		http
+			.headers(headers -> headers
+			.httpStrictTransportSecurity(hsts -> hsts.disable()) // added to fix the client credential issue 
+	)
 			.authorizeHttpRequests((authorize) -> authorize
 				.anyRequest().authenticated()
 			)
@@ -109,11 +134,12 @@ public class SecurityConfig {
 	@Bean 
 	public RegisteredClientRepository registeredClientRepository() {
 		RegisteredClient oidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
-				.clientId("oidc-client")
-				.clientSecret("{noop}secret")
+				.clientId("client")
+				.clientSecret("secret")
 				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
 				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
 				.redirectUri("http://127.0.0.1:8080/login/oauth2/code/oidc-client")
 				.postLogoutRedirectUri("http://127.0.0.1:8080/")
 				.scope(OidcScopes.OPENID)
