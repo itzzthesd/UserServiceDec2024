@@ -23,6 +23,7 @@ import com.example.UserService.models.User;
 import com.example.UserService.repositories.SessionRepository;
 import com.example.UserService.repositories.UserRepository;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.MacAlgorithm;
 
@@ -111,6 +112,14 @@ public class AuthService {
         if(sessOptional.isEmpty()){
             return null;
         }
+
+         MacAlgorithm alg = Jwts.SIG.HS256;
+        SecretKey key = alg.key().build();
+
+        Claims claims =
+                Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
+        
+        System.out.println("hello");
 
         return sessOptional.get().getSessionStatus();
     }
