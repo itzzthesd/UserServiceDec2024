@@ -93,18 +93,18 @@ public class SecurityConfig {
 		return http.build();
 	}
 
-	@Bean 
-	public UserDetailsService userDetailsService() {
+	// @Bean 
+	// public UserDetailsService userDetailsService() {
          
-		UserDetails userDetails = User.builder() // .withDefaultPasswordEncoder()
-				.username("user")
-				.password(bCryptPasswordEncoder.encode("password"))
-                //.password("password")
-				.roles("USER")
-				.build();
+	// 	UserDetails userDetails = User.builder() // .withDefaultPasswordEncoder()
+	// 			.username("user")
+	// 			.password(bCryptPasswordEncoder.encode("password"))
+    //             //.password("password")
+	// 			.roles("USER")
+	// 			.build();
 
-		return new InMemoryUserDetailsManager(userDetails);
-	}
+	// 	return new InMemoryUserDetailsManager(userDetails);
+	// }
 
 	@Bean 
 	public RegisteredClientRepository registeredClientRepository() {

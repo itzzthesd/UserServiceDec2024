@@ -31,20 +31,20 @@ import io.jsonwebtoken.security.MacAlgorithm;
 public class AuthService {
     private UserRepository userRepository;
     private SessionRepository sessionRepository;
-    //private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public AuthService(UserRepository userRepository, SessionRepository sessionRepository
-                        ){ //, BCryptPasswordEncoder bCryptPasswordEncoder
+                    , BCryptPasswordEncoder bCryptPasswordEncoder){
         this.userRepository = userRepository;
         this.sessionRepository = sessionRepository;
-        //this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     public UserDto signUp(String email, String password){
         User user = new User();
         user.setEmail(email);
-        //user.setPassword(bCryptPasswordEncoder.encode(password));
-        user.setPassword(password);
+        user.setPassword(bCryptPasswordEncoder.encode(password));
+        //user.setPassword(password);
         User savedUser = userRepository.save(user);
         return UserDto.from(savedUser);
     }
