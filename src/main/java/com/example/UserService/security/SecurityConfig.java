@@ -107,9 +107,10 @@ public class SecurityConfig {
 			throws Exception {
 		http
 			.headers(headers -> headers
-			.httpStrictTransportSecurity(hsts -> hsts.disable()) // added to fix the client credential issue 
-	)
+							.httpStrictTransportSecurity(hsts -> hsts.disable()) // added to fix the client credential issue 
+					)
 			.authorizeHttpRequests((authorize) -> authorize
+				.requestMatchers("/products/*").permitAll()
 				.anyRequest().authenticated()
 			)
 			// Form login handles the redirect to the login page from the
@@ -184,7 +185,10 @@ public class SecurityConfig {
 
 	@Bean 
 	public AuthorizationServerSettings authorizationServerSettings() {
-		return AuthorizationServerSettings.builder().build();
+		return AuthorizationServerSettings
+				.builder()
+				.issuer("http://localhost:9000")
+				.build();
 	}
 
 }

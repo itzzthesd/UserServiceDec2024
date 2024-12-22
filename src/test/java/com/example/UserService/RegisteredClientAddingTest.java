@@ -27,8 +27,8 @@ public class RegisteredClientAddingTest {
    @Commit
    void addNewRegisteredClient() {
        RegisteredClient oidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
-               .clientId("client")
-               .clientSecret(bCryptPasswordEncoder.encode("secret"))
+               .clientId("chester")
+               .clientSecret(bCryptPasswordEncoder.encode("password"))
                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
